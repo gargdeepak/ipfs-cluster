@@ -144,6 +144,10 @@ func (cfg *MetricsConfig) toJSONConfig() *jsonMetricsConfig {
 	}
 }
 
+func (cfg *MetricsConfig) String() string {
+	return config.String(*cfg.toJSONConfig(), nil)
+}
+
 // TracingConfig configures tracing.
 type TracingConfig struct {
 	config.Saver
@@ -256,4 +260,8 @@ func (cfg *TracingConfig) toJSONConfig() *jsonTracingConfig {
 		SamplingProb:        cfg.SamplingProb,
 		ServiceName:         cfg.ServiceName,
 	}
+}
+
+func (cfg *TracingConfig) String() string {
+	return config.String(*cfg.toJSONConfig(), nil)
 }

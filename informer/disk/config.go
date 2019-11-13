@@ -127,3 +127,7 @@ func (cfg *Config) toJSONConfig() *jsonConfig {
 		MetricType: cfg.MetricType.String(),
 	}
 }
+
+func (cfg *Config) String() string {
+	return config.String(*cfg.toJSONConfig(), nil)
+}

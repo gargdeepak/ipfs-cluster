@@ -92,6 +92,14 @@ func (m *mockCfg) Validate() error {
 	return nil
 }
 
+func (m *mockCfg) String() string {
+	return `
+	{
+		"a":"b"
+	}
+	`
+}
+
 func setupConfigManager() *Manager {
 	cfg := NewManager()
 	mockCfg := &mockCfg{}

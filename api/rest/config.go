@@ -475,6 +475,11 @@ func (cfg *Config) corsOptions() *cors.Options {
 	}
 }
 
+func (cfg *Config) String() string {
+	jcfg, _ := cfg.toJSONConfig()
+	return config.String(*jcfg, []string{"PrivateKey", "BasicAuthCredentials", "CORSAllowCredentials"})
+}
+
 func newTLSConfig(certFile, keyFile string) (*tls.Config, error) {
 	cert, err := tls.LoadX509KeyPair(certFile, keyFile)
 	if err != nil {

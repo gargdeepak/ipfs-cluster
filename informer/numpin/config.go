@@ -95,3 +95,7 @@ func (cfg *Config) toJSONConfig() *jsonConfig {
 		MetricTTL: cfg.MetricTTL.String(),
 	}
 }
+
+func (cfg *Config) String() string {
+	return config.String(*cfg.toJSONConfig(), nil)
+}

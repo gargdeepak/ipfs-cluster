@@ -225,3 +225,7 @@ func (cfg *Config) GetFolder() string {
 
 	return filepath.Join(cfg.BaseDir, cfg.Folder)
 }
+
+func (cfg *Config) String() string {
+	return config.String(*cfg.toJSONConfig(), nil)
+}

@@ -191,3 +191,7 @@ func (cfg *Config) ApplyEnvVars() error {
 
 	return cfg.applyJSONConfig(jcfg)
 }
+
+func (cfg *Config) String() string {
+	return config.String(*cfg.toJSONConfig(), nil)
+}

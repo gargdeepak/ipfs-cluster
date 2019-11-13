@@ -313,3 +313,7 @@ func (cfg *Config) GetDataFolder() string {
 	}
 	return cfg.DataFolder
 }
+
+func (cfg *Config) String() string {
+	return config.String(*cfg.toJSONConfig(), nil)
+}

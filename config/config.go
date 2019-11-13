@@ -46,6 +46,8 @@ type ComponentConfig interface {
 	// Provides a channel to signal the Manager that the configuration
 	// should be persisted.
 	SaveCh() <-chan struct{}
+	// String returns a string representing the config excluding hidden fields.
+	String() string
 }
 
 // These are the component configuration types
@@ -545,6 +547,25 @@ func (cfg *Manager) ToJSON() ([]byte, error) {
 // config or not.
 func (cfg *Manager) IsLoadedFromJSON(t SectionType, name string) bool {
 	return !cfg.undefinedComps[t][name]
+}
+
+func (cfg *Manager) String() string {
+	var result string
+
+	result += fmt.Sprintf("%-20s : ", cfg.clusterConfig.ConfigKey())
+	result += cfg.clusterConfig.String()
+	result += "\n\n"
+
+	for _, stype := range SectionTypes() {
+		for _, s := range cfg.sections[stype] {
+			result += fmt.Sprintf("%-20s : ", s.ConfigKey())
+			result += s.String()
+			result += "\n"
+		}
+		result += "\n"
+	}
+
+	return result
 }
 
 // GetClusterConfig extracts cluster config from the configuration file

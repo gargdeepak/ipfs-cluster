@@ -205,3 +205,8 @@ func (cfg *Config) toJSONConfig() (jcfg *jsonConfig, err error) {
 
 	return
 }
+
+func (cfg *Config) String() string {
+	jcfg, _ := cfg.toJSONConfig()
+	return config.String(*jcfg, nil)
+}

@@ -519,6 +519,13 @@ func (cfg *Config) GetPeerstorePath() string {
 	return filepath.Join(cfg.BaseDir, filename)
 }
 
+func (cfg *Config) String() string {
+	jcfg, _ := cfg.toConfigJSON()
+
+	hidden := []string{"ID", "PrivateKey", "Secret"}
+	return config.String(*jcfg, hidden)
+}
+
 // DecodeClusterSecret parses a hex-encoded string, checks that it is exactly
 // 32 bytes long and returns its value as a byte-slice.x
 func DecodeClusterSecret(hexSecret string) ([]byte, error) {

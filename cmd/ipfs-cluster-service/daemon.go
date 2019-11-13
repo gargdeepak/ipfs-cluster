@@ -122,6 +122,8 @@ func createCluster(
 	cfgs := cfgHelper.Configs()
 	cfgMgr := cfgHelper.Manager()
 
+	logger.Infof("this cluster peer's configurations are as follows:\n%s", cfgMgr.String())
+
 	ctx, err := tag.New(ctx, tag.Upsert(observations.HostKey, host.ID().Pretty()))
 	checkErr("tag context with host id", err)
 

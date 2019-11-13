@@ -111,3 +111,7 @@ func (cfg *Config) toJSONConfig() *jsonConfig {
 		FailureThreshold: &cfg.FailureThreshold,
 	}
 }
+
+func (cfg *Config) String() string {
+	return config.String(*cfg.toJSONConfig(), nil)
+}
