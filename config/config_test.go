@@ -184,3 +184,28 @@ func TestSaveWithSource(t *testing.T) {
 		t.Error("should have generated a source-only json")
 	}
 }
+
+func TestDefaultJSONMarshalWithoutHiddenFields(t *testing.T) {
+	type s struct {
+		A string `json:"a_key"`
+		B string `json:"b_key" hidden:"true"`
+	}
+	cfg := s{
+		A: "hi",
+		B: "there",
+	}
+
+	expected := `{
+  "a_key": "hi"
+}`
+
+	res, err := DefaultJSONMarshalWithoutHiddenFields(cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if string(res) != expected {
+		t.Error("result does not match expected")
+		t.Error(string(res))
+	}
+}

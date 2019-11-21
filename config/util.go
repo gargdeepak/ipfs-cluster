@@ -194,3 +194,52 @@ func in(arr []string, a string) bool {
 
 	return false
 }
+
+type hiddenField struct{}
+
+func (hf hiddenField) MarshalJSON() ([]byte, error) {
+	return []byte(`"XXX_hidden_XXX"`), nil
+}
+func (hf hiddenField) UnmarshalJSON(b []byte) error { return nil }
+
+// DefaultJSONMarhslaWithoutHiddenFields takes a JSON-friendly configuration
+// struct and returns the JSON-encoded representation of it filtering out
+// any struct fields marked with the tag `hidden:"true"`.
+func DefaultJSONMarshalWithoutHiddenFields(cfg interface{}) ([]byte, error) {
+	origStructT := reflect.TypeOf(cfg)
+	if origStructT.Kind() != reflect.Struct {
+		panic("the given argument should be a struct")
+	}
+
+	hiddenFieldT := reflect.TypeOf(hiddenField{})
+
+	// create a new struct type with same fields
+	// but setting hidden fields as hidden.
+	finalStructFields := []reflect.StructField{}
+	for i := 0; i < origStructT.NumField(); i++ {
+		f := origStructT.Field(i)
+		hidden := f.Tag.Get("hidden") == "true"
+		if f.PkgPath != "" { // skip unexported
+			continue
+		}
+		if hidden {
+			f.Type = hiddenFieldT
+		}
+		finalStructFields = append(finalStructFields, f)
+	}
+
+	// Parse the original JSON into the new
+	// struct and re-convert it to JSON.
+	finalStructT := reflect.StructOf(finalStructFields)
+	finalValue := reflect.New(finalStructT)
+	data := finalValue.Interface()
+	origJson, err := json.Marshal(cfg)
+	if err != nil {
+		return nil, err
+	}
+	err = json.Unmarshal(origJson, data)
+	if err != nil {
+		return nil, err
+	}
+	return DefaultJSONMarshal(data)
+}
