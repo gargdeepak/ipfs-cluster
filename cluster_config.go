@@ -165,8 +165,8 @@ type Config struct {
 type configJSON struct {
 	ID                   string             `json:"id,omitempty"`
 	Peername             string             `json:"peername"`
-	PrivateKey           string             `json:"private_key,omitempty"`
-	Secret               string             `json:"secret"`
+	PrivateKey           string             `json:"private_key,omitempty" hidden:"true"`
+	Secret               string             `json:"secret" hidden:"true"`
 	LeaveOnShutdown      bool               `json:"leave_on_shutdown"`
 	ListenMultiaddress   ipfsconfig.Strings `json:"listen_multiaddress"`
 	EnableRelayHop       bool               `json:"enable_relay_hop"`
@@ -519,11 +519,17 @@ func (cfg *Config) GetPeerstorePath() string {
 	return filepath.Join(cfg.BaseDir, filename)
 }
 
-func (cfg *Config) String() string {
-	jcfg, _ := cfg.toConfigJSON()
+func (cfg *Config) String() (string, error) {
+	jcfg, err := cfg.toConfigJSON()
+	if err != nil {
+		return "", err
+	}
+	bytes, err := config.DefaultJSONMarshalWithoutHiddenFields(*jcfg)
+	if err != nil {
+		return "", err
+	}
 
-	hidden := []string{"ID", "PrivateKey", "Secret"}
-	return config.String(*jcfg, hidden)
+	return string(bytes), nil
 }
 
 // DecodeClusterSecret parses a hex-encoded string, checks that it is exactly

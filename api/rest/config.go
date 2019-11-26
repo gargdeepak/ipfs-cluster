@@ -142,9 +142,9 @@ type jsonConfig struct {
 
 	Libp2pListenMultiaddress string `json:"libp2p_listen_multiaddress,omitempty"`
 	ID                       string `json:"id,omitempty"`
-	PrivateKey               string `json:"private_key,omitempty"`
+	PrivateKey               string `json:"private_key,omitempty" hidden:"true"`
 
-	BasicAuthCredentials map[string]string   `json:"basic_auth_credentials"`
+	BasicAuthCredentials map[string]string   `json:"basic_auth_credentials"  hidden:"true"`
 	HTTPLogFile          string              `json:"http_log_file"`
 	Headers              map[string][]string `json:"headers"`
 
@@ -152,7 +152,7 @@ type jsonConfig struct {
 	CORSAllowedMethods   []string `json:"cors_allowed_methods"`
 	CORSAllowedHeaders   []string `json:"cors_allowed_headers"`
 	CORSExposedHeaders   []string `json:"cors_exposed_headers"`
-	CORSAllowCredentials bool     `json:"cors_allow_credentials"`
+	CORSAllowCredentials bool     `json:"cors_allow_credentials"  hidden:"true"`
 	CORSMaxAge           string   `json:"cors_max_age"`
 }
 
@@ -475,9 +475,17 @@ func (cfg *Config) corsOptions() *cors.Options {
 	}
 }
 
-func (cfg *Config) String() string {
-	jcfg, _ := cfg.toJSONConfig()
-	return config.String(*jcfg, []string{"PrivateKey", "BasicAuthCredentials", "CORSAllowCredentials"})
+func (cfg *Config) String() (string, error) {
+	jcfg, err := cfg.toJSONConfig()
+	if err != nil {
+		return "", err
+	}
+
+	bytes, err := config.DefaultJSONMarshalWithoutHiddenFields(*jcfg)
+	if err != nil {
+		return "", err
+	}
+	return string(bytes), nil
 }
 
 func newTLSConfig(certFile, keyFile string) (*tls.Config, error) {

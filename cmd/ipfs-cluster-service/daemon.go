@@ -121,10 +121,12 @@ func createCluster(
 
 	cfgs := cfgHelper.Configs()
 	cfgMgr := cfgHelper.Manager()
+	cfgStr, err := cfgMgr.String()
+	checkErr("getting string configuration string", err)
 
-	logger.Debugf("this cluster peer's configurations are as follows:\n%s", cfgMgr.String())
+	logger.Debugf("Configuration:\n", cfgStr)
 
-	ctx, err := tag.New(ctx, tag.Upsert(observations.HostKey, host.ID().Pretty()))
+	ctx, err = tag.New(ctx, tag.Upsert(observations.HostKey, host.ID().Pretty()))
 	checkErr("tag context with host id", err)
 
 	var apis []ipfscluster.API

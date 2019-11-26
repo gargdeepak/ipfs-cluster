@@ -92,12 +92,12 @@ func (m *mockCfg) Validate() error {
 	return nil
 }
 
-func (m *mockCfg) String() string {
+func (m *mockCfg) String() (string, error) {
 	return `
 	{
 		"a":"b"
 	}
-	`
+	`, nil
 }
 
 func setupConfigManager() *Manager {

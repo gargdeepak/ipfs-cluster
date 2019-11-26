@@ -116,85 +116,6 @@ func ParseDurations(component string, args ...*DurationOpt) error {
 	return nil
 }
 
-// String takes an object and returns it's string form excluding hidden
-// elements.
-func String(cfg interface{}, hidden []string) string {
-	return sType(reflect.ValueOf(cfg), hidden, "")
-}
-
-func sType(v reflect.Value, hidden []string, padding string) string {
-	var result string
-
-	switch v.Kind() {
-	case reflect.Struct:
-		result += fmt.Sprintf("{\n")
-		childPadding := padding + "  " // padding plus two spaces
-		for i := 0; i < v.NumField(); i++ {
-			field := v.Field(i)
-			childName := v.Type().Field(i).Name
-
-			if in(hidden, childName) {
-				continue
-			}
-
-			switch field.Kind() {
-			case reflect.Struct, reflect.Slice, reflect.Map:
-				result += fmt.Sprintf("%s%-20s : %s,\n", childPadding, childName, sType(field, hidden, childPadding))
-			case reflect.Ptr:
-				result += fmt.Sprintf("%s%-20s : %s,\n", childPadding, childName, sType(reflect.Indirect(field), hidden, childPadding))
-			default:
-				result += fmt.Sprintf("%s%-20s : %s,\n", childPadding, childName, sType(field, nil, ""))
-			}
-		}
-		result += fmt.Sprintf("%s}", padding)
-		return result
-	case reflect.Slice:
-		result += fmt.Sprintf("[\n")
-		slicePadding := padding + "  "
-		for i := 0; i < v.Len(); i++ {
-			result += fmt.Sprintf("%s%s,\n", slicePadding, sType(v.Index(i), nil, ""))
-		}
-		result += fmt.Sprintf("%s]", padding)
-		return result
-	case reflect.Map:
-		result += fmt.Sprintf("{\n")
-		slicePadding := padding + "  "
-		for _, key := range v.MapKeys() {
-			result += fmt.Sprintf("%s%s,\n", slicePadding, sType(v.MapIndex(key), nil, ""))
-		}
-		result += fmt.Sprintf("%s}", padding)
-	case reflect.Ptr:
-		result += sType(reflect.Indirect(v), hidden, padding)
-	case reflect.String:
-		return fmt.Sprintf("%s", v.String())
-	case reflect.Int:
-		return fmt.Sprintf("%d", v.Int())
-	case reflect.Bool:
-		return fmt.Sprintf("%t", v.Bool())
-	case reflect.Float64:
-		return fmt.Sprintf("%f", v.Float())
-	case reflect.Int64:
-		return fmt.Sprintf("%d", v.Int())
-	case reflect.Uint64:
-		return fmt.Sprintf("%d", v.Uint())
-	case reflect.Uint32:
-		return fmt.Sprintf("%d", v.Uint())
-	default:
-		return fmt.Sprintf("unexpected kind %s", v.Kind().String())
-	}
-	return ""
-}
-
-func in(arr []string, a string) bool {
-	for _, f := range arr {
-		if a == f {
-			return true
-		}
-	}
-
-	return false
-}
-
 type hiddenField struct{}
 
 func (hf hiddenField) MarshalJSON() ([]byte, error) {
@@ -202,7 +123,7 @@ func (hf hiddenField) MarshalJSON() ([]byte, error) {
 }
 func (hf hiddenField) UnmarshalJSON(b []byte) error { return nil }
 
-// DefaultJSONMarhslaWithoutHiddenFields takes a JSON-friendly configuration
+// DefaultJSONMarshalWithoutHiddenFields takes a JSON-friendly configuration
 // struct and returns the JSON-encoded representation of it filtering out
 // any struct fields marked with the tag `hidden:"true"`.
 func DefaultJSONMarshalWithoutHiddenFields(cfg interface{}) ([]byte, error) {
@@ -233,11 +154,11 @@ func DefaultJSONMarshalWithoutHiddenFields(cfg interface{}) ([]byte, error) {
 	finalStructT := reflect.StructOf(finalStructFields)
 	finalValue := reflect.New(finalStructT)
 	data := finalValue.Interface()
-	origJson, err := json.Marshal(cfg)
+	origJSON, err := json.Marshal(cfg)
 	if err != nil {
 		return nil, err
 	}
-	err = json.Unmarshal(origJson, data)
+	err = json.Unmarshal(origJSON, data)
 	if err != nil {
 		return nil, err
 	}

@@ -11,6 +11,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 
@@ -47,7 +48,7 @@ type ComponentConfig interface {
 	// should be persisted.
 	SaveCh() <-chan struct{}
 	// String returns a string representing the config excluding hidden fields.
-	String() string
+	String() (string, error)
 }
 
 // These are the component configuration types
@@ -549,23 +550,28 @@ func (cfg *Manager) IsLoadedFromJSON(t SectionType, name string) bool {
 	return !cfg.undefinedComps[t][name]
 }
 
-func (cfg *Manager) String() string {
-	var result string
+func (cfg *Manager) String() (string, error) {
+	var result strings.Builder
 
-	result += fmt.Sprintf("%-20s : ", cfg.clusterConfig.ConfigKey())
-	result += cfg.clusterConfig.String()
-	result += "\n\n"
-
-	for _, stype := range SectionTypes() {
-		for _, s := range cfg.sections[stype] {
-			result += fmt.Sprintf("%-20s : ", s.ConfigKey())
-			result += s.String()
-			result += "\n"
-		}
-		result += "\n"
+	clusterConfig, err := cfg.clusterConfig.String()
+	if err != nil {
+		return "", err
 	}
 
-	return result
+	// ignoring error from WriteString since it will always be nil
+	result.WriteString(fmt.Sprintf("%-20s : %s\n\n", cfg.clusterConfig.ConfigKey(), clusterConfig))
+	for _, stype := range SectionTypes() {
+		for _, s := range cfg.sections[stype] {
+			cfgStr, err := s.String()
+			if err != nil {
+				return "", err
+			}
+			result.WriteString(fmt.Sprintf("%-20s : %s\n", s.ConfigKey(), cfgStr))
+		}
+		result.WriteString("\n")
+	}
+
+	return result.String(), nil
 }
 
 // GetClusterConfig extracts cluster config from the configuration file
