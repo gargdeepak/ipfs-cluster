@@ -196,7 +196,8 @@ func TestDefaultJSONMarshalWithoutHiddenFields(t *testing.T) {
 	}
 
 	expected := `{
-  "a_key": "hi"
+  "a_key": "hi",
+  "b_key": "XXX_hidden_XXX"
 }`
 
 	res, err := DefaultJSONMarshalWithoutHiddenFields(cfg)
