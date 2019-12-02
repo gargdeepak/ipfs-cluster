@@ -47,8 +47,8 @@ type ComponentConfig interface {
 	// Provides a channel to signal the Manager that the configuration
 	// should be persisted.
 	SaveCh() <-chan struct{}
-	// String returns a string representing the config excluding hidden fields.
-	String() (string, error)
+	// ToDisplayJSON returns a string representing the config excluding hidden fields.
+	ToDisplayJSON() (string, error)
 }
 
 // These are the component configuration types
@@ -553,7 +553,7 @@ func (cfg *Manager) IsLoadedFromJSON(t SectionType, name string) bool {
 func (cfg *Manager) String() (string, error) {
 	var result strings.Builder
 
-	clusterConfig, err := cfg.clusterConfig.String()
+	clusterConfig, err := cfg.clusterConfig.ToDisplayJSON()
 	if err != nil {
 		return "", err
 	}
@@ -562,7 +562,7 @@ func (cfg *Manager) String() (string, error) {
 	result.WriteString(fmt.Sprintf("%-20s : %s\n\n", cfg.clusterConfig.ConfigKey(), clusterConfig))
 	for _, stype := range SectionTypes() {
 		for _, s := range cfg.sections[stype] {
-			cfgStr, err := s.String()
+			cfgStr, err := s.ToDisplayJSON()
 			if err != nil {
 				return "", err
 			}

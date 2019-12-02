@@ -206,15 +206,13 @@ func (cfg *Config) toJSONConfig() (jcfg *jsonConfig, err error) {
 	return
 }
 
-func (cfg *Config) String() (string, error) {
+// ToDisplayJSON returns JSON config as a string.
+func (cfg *Config) ToDisplayJSON() (string, error) {
 	jcfg, err := cfg.toJSONConfig()
 	if err != nil {
 		return "", err
 	}
 
 	bytes, err := config.DefaultJSONMarshalWithoutHiddenFields(*jcfg)
-	if err != nil {
-		return "", err
-	}
-	return string(bytes), nil
+	return string(bytes), err
 }

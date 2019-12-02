@@ -152,7 +152,7 @@ type jsonConfig struct {
 	CORSAllowedMethods   []string `json:"cors_allowed_methods"`
 	CORSAllowedHeaders   []string `json:"cors_allowed_headers"`
 	CORSExposedHeaders   []string `json:"cors_exposed_headers"`
-	CORSAllowCredentials bool     `json:"cors_allow_credentials"  hidden:"true"`
+	CORSAllowCredentials bool     `json:"cors_allow_credentials"`
 	CORSMaxAge           string   `json:"cors_max_age"`
 }
 
@@ -475,17 +475,15 @@ func (cfg *Config) corsOptions() *cors.Options {
 	}
 }
 
-func (cfg *Config) String() (string, error) {
+// ToDisplayJSON returns JSON config as a string.
+func (cfg *Config) ToDisplayJSON() (string, error) {
 	jcfg, err := cfg.toJSONConfig()
 	if err != nil {
 		return "", err
 	}
 
 	bytes, err := config.DefaultJSONMarshalWithoutHiddenFields(*jcfg)
-	if err != nil {
-		return "", err
-	}
-	return string(bytes), nil
+	return string(bytes), err
 }
 
 func newTLSConfig(certFile, keyFile string) (*tls.Config, error) {

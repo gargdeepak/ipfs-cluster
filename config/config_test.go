@@ -92,7 +92,7 @@ func (m *mockCfg) Validate() error {
 	return nil
 }
 
-func (m *mockCfg) String() (string, error) {
+func (m *mockCfg) ToDisplayJSON() (string, error) {
 	return `
 	{
 		"a":"b"
