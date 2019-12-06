@@ -145,9 +145,8 @@ func (cfg *MetricsConfig) toJSONConfig() *jsonMetricsConfig {
 }
 
 // ToDisplayJSON returns JSON config as a string.
-func (cfg *MetricsConfig) ToDisplayJSON() (string, error) {
-	bytes, err := config.DefaultJSONMarshalWithoutHiddenFields(*cfg.toJSONConfig())
-	return string(bytes), err
+func (cfg *MetricsConfig) ToDisplayJSON() ([]byte, error) {
+	return config.DisplayJSON(cfg.toJSONConfig())
 }
 
 // TracingConfig configures tracing.
@@ -265,7 +264,6 @@ func (cfg *TracingConfig) toJSONConfig() *jsonTracingConfig {
 }
 
 // ToDisplayJSON returns JSON config as a string.
-func (cfg *TracingConfig) ToDisplayJSON() (string, error) {
-	bytes, err := config.DefaultJSONMarshalWithoutHiddenFields(*cfg.toJSONConfig())
-	return string(bytes), err
+func (cfg *TracingConfig) ToDisplayJSON() ([]byte, error) {
+	return config.DisplayJSON(cfg.toJSONConfig())
 }

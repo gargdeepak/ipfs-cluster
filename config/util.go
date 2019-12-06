@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"strings"
 	"time"
 )
 
@@ -123,10 +124,11 @@ func (hf hiddenField) MarshalJSON() ([]byte, error) {
 }
 func (hf hiddenField) UnmarshalJSON(b []byte) error { return nil }
 
-// DefaultJSONMarshalWithoutHiddenFields takes pointer to a JSON-friendly
-// configuration struct and returns the JSON-encoded representation of it
-// filtering out any struct fields marked with the tag `hidden:"true"`.
-func DefaultJSONMarshalWithoutHiddenFields(cfg interface{}) ([]byte, error) {
+// DisplayJSON takes pointer to a JSON-friendly configuration struct and
+// returns the JSON-encoded representation of it filtering out any struct
+// fields marked with the tag `hidden:"true"`, but keeping fields marked
+// with `"json:omiempty"`.
+func DisplayJSON(cfg interface{}) ([]byte, error) {
 	cfg = reflect.Indirect(reflect.ValueOf(cfg)).Interface()
 	origStructT := reflect.TypeOf(cfg)
 	if origStructT.Kind() != reflect.Struct {
@@ -147,7 +149,21 @@ func DefaultJSONMarshalWithoutHiddenFields(cfg interface{}) ([]byte, error) {
 		if hidden {
 			f.Type = hiddenFieldT
 		}
-		finalStructFields = append(finalStructFields, f)
+
+		// remove omitempty from tag
+		newF := reflect.StructField{
+			Name:      f.Name,
+			PkgPath:   f.PkgPath,
+			Type:      f.Type,
+			Offset:    f.Offset,
+			Index:     f.Index,
+			Anonymous: f.Anonymous,
+		}
+		tagStr := strings.Replace(string(f.Tag), "omitempty", "", 1)
+		tagStr = strings.Replace(tagStr, ",\"", "\"", 1)
+		newF.Tag = reflect.StructTag(tagStr)
+
+		finalStructFields = append(finalStructFields, newF)
 	}
 
 	// Parse the original JSON into the new

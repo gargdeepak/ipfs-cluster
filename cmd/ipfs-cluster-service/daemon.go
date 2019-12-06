@@ -121,10 +121,9 @@ func createCluster(
 
 	cfgs := cfgHelper.Configs()
 	cfgMgr := cfgHelper.Manager()
-	cfgStr, err := cfgMgr.String()
+	cfgBytes, err := cfgMgr.ToJSON(true)
 	checkErr("getting string configuration string", err)
-
-	logger.Debugf("Configuration:\n", cfgStr)
+	logger.Infof("Configuration:\n%s\n", cfgBytes)
 
 	ctx, err = tag.New(ctx, tag.Upsert(observations.HostKey, host.ID().Pretty()))
 	checkErr("tag context with host id", err)

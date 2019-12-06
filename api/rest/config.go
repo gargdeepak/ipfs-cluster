@@ -476,14 +476,13 @@ func (cfg *Config) corsOptions() *cors.Options {
 }
 
 // ToDisplayJSON returns JSON config as a string.
-func (cfg *Config) ToDisplayJSON() (string, error) {
+func (cfg *Config) ToDisplayJSON() ([]byte, error) {
 	jcfg, err := cfg.toJSONConfig()
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	bytes, err := config.DefaultJSONMarshalWithoutHiddenFields(jcfg)
-	return string(bytes), err
+	return config.DisplayJSON(jcfg)
 }
 
 func newTLSConfig(certFile, keyFile string) (*tls.Config, error) {

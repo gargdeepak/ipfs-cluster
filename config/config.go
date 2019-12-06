@@ -11,7 +11,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"path/filepath"
-	"strings"
 	"sync"
 	"time"
 
@@ -470,7 +469,7 @@ func (cfg *Manager) SaveJSON(path string) error {
 		cfg.path = path
 	}
 
-	bs, err := cfg.ToJSON()
+	bs, err := cfg.ToJSON(false)
 	if err != nil {
 		return err
 	}
@@ -480,7 +479,7 @@ func (cfg *Manager) SaveJSON(path string) error {
 
 // ToJSON provides a JSON representation of the configuration by
 // generating JSON for all componenents registered.
-func (cfg *Manager) ToJSON() ([]byte, error) {
+func (cfg *Manager) ToJSON(display bool) ([]byte, error) {
 	dir := filepath.Dir(cfg.path)
 
 	err := cfg.Validate()
@@ -499,8 +498,12 @@ func (cfg *Manager) ToJSON() ([]byte, error) {
 
 	if cfg.clusterConfig != nil {
 		cfg.clusterConfig.SetBaseDir(dir)
-		raw, err := cfg.clusterConfig.ToJSON()
-
+		var raw []byte
+		if display {
+			raw, err = cfg.clusterConfig.ToDisplayJSON()
+		} else {
+			raw, err = cfg.clusterConfig.ToJSON()
+		}
 		if err != nil {
 			return nil, err
 		}
@@ -515,7 +518,12 @@ func (cfg *Manager) ToJSON() ([]byte, error) {
 		for k, v := range section {
 			v.SetBaseDir(dir)
 			logger.Debugf("writing changes for %s section", k)
-			j, err := v.ToJSON()
+			var j []byte
+			if display {
+				j, err = v.ToDisplayJSON()
+			} else {
+				j, err = v.ToJSON()
+			}
 			if err != nil {
 				return err
 			}
@@ -548,30 +556,6 @@ func (cfg *Manager) ToJSON() ([]byte, error) {
 // config or not.
 func (cfg *Manager) IsLoadedFromJSON(t SectionType, name string) bool {
 	return !cfg.undefinedComps[t][name]
-}
-
-func (cfg *Manager) String() (string, error) {
-	var result strings.Builder
-
-	clusterConfig, err := cfg.clusterConfig.ToDisplayJSON()
-	if err != nil {
-		return "", err
-	}
-
-	// ignoring error from WriteString since it will always be nil
-	result.WriteString(fmt.Sprintf("%-20s : %s\n\n", cfg.clusterConfig.ConfigKey(), clusterConfig))
-	for _, stype := range SectionTypes() {
-		for _, s := range cfg.sections[stype] {
-			cfgStr, err := s.ToDisplayJSON()
-			if err != nil {
-				return "", err
-			}
-			result.WriteString(fmt.Sprintf("%-20s : %s\n", s.ConfigKey(), cfgStr))
-		}
-		result.WriteString("\n")
-	}
-
-	return result.String(), nil
 }
 
 // GetClusterConfig extracts cluster config from the configuration file

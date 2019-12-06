@@ -523,10 +523,9 @@ func (cfg *Config) GetPeerstorePath() string {
 func (cfg *Config) ToDisplayJSON() ([]byte, error) {
 	jcfg, err := cfg.toConfigJSON()
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	bytes, err := config.DefaultJSONMarshalWithoutHiddenFields(jcfg)
-	return string(bytes), err
+	return config.DisplayJSON(jcfg)
 }
 
 // DecodeClusterSecret parses a hex-encoded string, checks that it is exactly

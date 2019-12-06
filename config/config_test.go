@@ -92,12 +92,12 @@ func (m *mockCfg) Validate() error {
 	return nil
 }
 
-func (m *mockCfg) ToDisplayJSON() (string, error) {
-	return `
+func (m *mockCfg) ToDisplayJSON() ([]byte, error) {
+	return []byte(`
 	{
 		"a":"b"
 	}
-	`, nil
+	`), nil
 }
 
 func setupConfigManager() *Manager {
@@ -116,7 +116,7 @@ func TestManager_ToJSON(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	got, err := cfgMgr.ToJSON()
+	got, err := cfgMgr.ToJSON(false)
 	if err != nil {
 		t.Error(err)
 	}
@@ -157,7 +157,7 @@ func TestLoadFromHTTPSource(t *testing.T) {
 	}
 
 	cfgMgr.Source = ""
-	newJSON, err := cfgMgr.ToJSON()
+	newJSON, err := cfgMgr.ToJSON(false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -171,7 +171,7 @@ func TestSaveWithSource(t *testing.T) {
 	cfgMgr := setupConfigManager()
 	cfgMgr.Default()
 	cfgMgr.Source = "http://a.b.c"
-	newJSON, err := cfgMgr.ToJSON()
+	newJSON, err := cfgMgr.ToJSON(false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -200,7 +200,7 @@ func TestDefaultJSONMarshalWithoutHiddenFields(t *testing.T) {
   "b_key": "XXX_hidden_XXX"
 }`
 
-	res, err := DefaultJSONMarshalWithoutHiddenFields(&cfg)
+	res, err := DisplayJSON(&cfg)
 	if err != nil {
 		t.Fatal(err)
 	}
