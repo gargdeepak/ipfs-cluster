@@ -520,12 +520,12 @@ func (cfg *Config) GetPeerstorePath() string {
 }
 
 // ToDisplayJSON returns JSON config as a string.
-func (cfg *Config) ToDisplayJSON() (string, error) {
+func (cfg *Config) ToDisplayJSON() ([]byte, error) {
 	jcfg, err := cfg.toConfigJSON()
 	if err != nil {
 		return "", err
 	}
-	bytes, err := config.DefaultJSONMarshalWithoutHiddenFields(*jcfg)
+	bytes, err := config.DefaultJSONMarshalWithoutHiddenFields(jcfg)
 	return string(bytes), err
 }
 

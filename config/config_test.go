@@ -200,7 +200,7 @@ func TestDefaultJSONMarshalWithoutHiddenFields(t *testing.T) {
   "b_key": "XXX_hidden_XXX"
 }`
 
-	res, err := DefaultJSONMarshalWithoutHiddenFields(cfg)
+	res, err := DefaultJSONMarshalWithoutHiddenFields(&cfg)
 	if err != nil {
 		t.Fatal(err)
 	}

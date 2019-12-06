@@ -48,7 +48,7 @@ type ComponentConfig interface {
 	// should be persisted.
 	SaveCh() <-chan struct{}
 	// ToDisplayJSON returns a string representing the config excluding hidden fields.
-	ToDisplayJSON() (string, error)
+	ToDisplayJSON() ([]byte, error)
 }
 
 // These are the component configuration types

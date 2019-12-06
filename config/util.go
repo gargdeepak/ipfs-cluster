@@ -123,10 +123,11 @@ func (hf hiddenField) MarshalJSON() ([]byte, error) {
 }
 func (hf hiddenField) UnmarshalJSON(b []byte) error { return nil }
 
-// DefaultJSONMarshalWithoutHiddenFields takes a JSON-friendly configuration
-// struct and returns the JSON-encoded representation of it filtering out
-// any struct fields marked with the tag `hidden:"true"`.
+// DefaultJSONMarshalWithoutHiddenFields takes pointer to a JSON-friendly
+// configuration struct and returns the JSON-encoded representation of it
+// filtering out any struct fields marked with the tag `hidden:"true"`.
 func DefaultJSONMarshalWithoutHiddenFields(cfg interface{}) ([]byte, error) {
+	cfg = reflect.Indirect(reflect.ValueOf(cfg)).Interface()
 	origStructT := reflect.TypeOf(cfg)
 	if origStructT.Kind() != reflect.Struct {
 		panic("the given argument should be a struct")

@@ -324,6 +324,6 @@ func (cfg *Config) ToDisplayJSON() (string, error) {
 		return "", err
 	}
 
-	bytes, err := config.DefaultJSONMarshalWithoutHiddenFields(*jcfg)
+	bytes, err := config.DefaultJSONMarshalWithoutHiddenFields(jcfg)
 	return string(bytes), err
 }

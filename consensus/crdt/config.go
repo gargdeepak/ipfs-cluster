@@ -194,6 +194,6 @@ func (cfg *Config) ApplyEnvVars() error {
 
 // ToDisplayJSON returns JSON config as a string.
 func (cfg *Config) ToDisplayJSON() (string, error) {
-	bytes, err := config.DefaultJSONMarshalWithoutHiddenFields(*cfg.toJSONConfig())
+	bytes, err := config.DefaultJSONMarshalWithoutHiddenFields(cfg.toJSONConfig())
 	return string(bytes), err
 }
