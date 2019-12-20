@@ -121,7 +121,7 @@ func createCluster(
 
 	cfgs := cfgHelper.Configs()
 	cfgMgr := cfgHelper.Manager()
-	cfgBytes, err := cfgMgr.ToJSON(true)
+	cfgBytes, err := cfgMgr.ToDisplayJSON()
 	checkErr("getting string configuration string", err)
 	logger.Infof("Configuration:\n%s\n", cfgBytes)
 

@@ -116,7 +116,7 @@ func TestManager_ToJSON(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	got, err := cfgMgr.ToJSON(false)
+	got, err := cfgMgr.ToJSON()
 	if err != nil {
 		t.Error(err)
 	}
@@ -157,7 +157,7 @@ func TestLoadFromHTTPSource(t *testing.T) {
 	}
 
 	cfgMgr.Source = ""
-	newJSON, err := cfgMgr.ToJSON(false)
+	newJSON, err := cfgMgr.ToJSON()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -171,7 +171,7 @@ func TestSaveWithSource(t *testing.T) {
 	cfgMgr := setupConfigManager()
 	cfgMgr.Default()
 	cfgMgr.Source = "http://a.b.c"
-	newJSON, err := cfgMgr.ToJSON(false)
+	newJSON, err := cfgMgr.ToJSON()
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -127,7 +127,7 @@ func (hf hiddenField) UnmarshalJSON(b []byte) error { return nil }
 // DisplayJSON takes pointer to a JSON-friendly configuration struct and
 // returns the JSON-encoded representation of it filtering out any struct
 // fields marked with the tag `hidden:"true"`, but keeping fields marked
-// with `"json:omiempty"`.
+// with `"json:omitempty"`.
 func DisplayJSON(cfg interface{}) ([]byte, error) {
 	cfg = reflect.Indirect(reflect.ValueOf(cfg)).Interface()
 	origStructT := reflect.TypeOf(cfg)
@@ -150,20 +150,16 @@ func DisplayJSON(cfg interface{}) ([]byte, error) {
 			f.Type = hiddenFieldT
 		}
 
-		// remove omitempty from tag
-		newF := reflect.StructField{
-			Name:      f.Name,
-			PkgPath:   f.PkgPath,
-			Type:      f.Type,
-			Offset:    f.Offset,
-			Index:     f.Index,
-			Anonymous: f.Anonymous,
+		// remove omitempty from tag, ignore other tags except json
+		var jsonTags []string
+		for _, s := range strings.Split(f.Tag.Get("json"), ",") {
+			if s != "omitempty" {
+				jsonTags = append(jsonTags, s)
+			}
 		}
-		tagStr := strings.Replace(string(f.Tag), "omitempty", "", 1)
-		tagStr = strings.Replace(tagStr, ",\"", "\"", 1)
-		newF.Tag = reflect.StructTag(tagStr)
+		f.Tag = reflect.StructTag(fmt.Sprintf("json:\"%s\"", strings.Join(jsonTags, ",")))
 
-		finalStructFields = append(finalStructFields, newF)
+		finalStructFields = append(finalStructFields, f)
 	}
 
 	// Parse the original JSON into the new

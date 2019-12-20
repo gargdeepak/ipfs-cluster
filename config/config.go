@@ -469,7 +469,7 @@ func (cfg *Manager) SaveJSON(path string) error {
 		cfg.path = path
 	}
 
-	bs, err := cfg.ToJSON(false)
+	bs, err := cfg.ToJSON()
 	if err != nil {
 		return err
 	}
@@ -479,7 +479,7 @@ func (cfg *Manager) SaveJSON(path string) error {
 
 // ToJSON provides a JSON representation of the configuration by
 // generating JSON for all componenents registered.
-func (cfg *Manager) ToJSON(display bool) ([]byte, error) {
+func (cfg *Manager) ToJSON() ([]byte, error) {
 	dir := filepath.Dir(cfg.path)
 
 	err := cfg.Validate()
@@ -498,12 +498,7 @@ func (cfg *Manager) ToJSON(display bool) ([]byte, error) {
 
 	if cfg.clusterConfig != nil {
 		cfg.clusterConfig.SetBaseDir(dir)
-		var raw []byte
-		if display {
-			raw, err = cfg.clusterConfig.ToDisplayJSON()
-		} else {
-			raw, err = cfg.clusterConfig.ToJSON()
-		}
+		raw, err := cfg.clusterConfig.ToJSON()
 		if err != nil {
 			return nil, err
 		}
@@ -518,12 +513,7 @@ func (cfg *Manager) ToJSON(display bool) ([]byte, error) {
 		for k, v := range section {
 			v.SetBaseDir(dir)
 			logger.Debugf("writing changes for %s section", k)
-			var j []byte
-			if display {
-				j, err = v.ToDisplayJSON()
-			} else {
-				j, err = v.ToJSON()
-			}
+			j, err := v.ToJSON()
 			if err != nil {
 				return err
 			}
@@ -537,6 +527,52 @@ func (cfg *Manager) ToJSON(display bool) ([]byte, error) {
 		return nil
 	}
 
+	err = cfg.applyUpdateJSONConfigs(jcfg, updateJSONConfigs)
+	if err != nil {
+		return nil, err
+	}
+
+	return DefaultJSONMarshal(jcfg)
+}
+
+// ToDisplayJSON returns a printable cluster configuration.
+func (cfg *Manager) ToDisplayJSON() ([]byte, error) {
+	jcfg := &jsonConfig{}
+
+	if cfg.clusterConfig != nil {
+		raw, err := cfg.clusterConfig.ToDisplayJSON()
+		if err != nil {
+			return nil, err
+		}
+		jcfg.Cluster = new(json.RawMessage)
+		*jcfg.Cluster = raw
+	}
+
+	updateJSONConfigs := func(section Section, dest *jsonSection) error {
+		for k, v := range section {
+			j, err := v.ToDisplayJSON()
+			if err != nil {
+				return err
+			}
+			if *dest == nil {
+				*dest = make(jsonSection)
+			}
+			jsonSection := *dest
+			jsonSection[k] = new(json.RawMessage)
+			*jsonSection[k] = j
+		}
+		return nil
+	}
+
+	err := cfg.applyUpdateJSONConfigs(jcfg, updateJSONConfigs)
+	if err != nil {
+		return nil, err
+	}
+
+	return DefaultJSONMarshal(jcfg)
+}
+
+func (cfg *Manager) applyUpdateJSONConfigs(jcfg *jsonConfig, updateJSONConfigs func(section Section, dest *jsonSection) error) error {
 	for _, t := range SectionTypes() {
 		if t == Cluster {
 			continue
@@ -544,11 +580,11 @@ func (cfg *Manager) ToJSON(display bool) ([]byte, error) {
 		jsection := jcfg.getSection(t)
 		err := updateJSONConfigs(cfg.sections[t], jsection)
 		if err != nil {
-			return nil, err
+			return err
 		}
 	}
 
-	return DefaultJSONMarshal(jcfg)
+	return nil
 }
 
 // IsLoadedFromJSON tells whether the given component belonging to
